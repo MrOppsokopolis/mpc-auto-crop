@@ -113,7 +113,9 @@ for file in files:
         print(f'Time elapsed: {toc - tic:0.4f}s')
 
 print()
+print(f'Total processing time: {total_process_time:0.4f}s')
 print(f'Average file processing time: {total_process_time / files_count:0.4f}s')
+print()
 
 if files_count == 0:
     print(f'There are no .jpg or .png files in directory: "{input_dir}"')
