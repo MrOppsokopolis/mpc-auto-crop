@@ -4,14 +4,12 @@ Automatically crop an MPC ready image (with bleed edge) to what it will look lik
 ## Installation and Usage
 (Requires Python 3.8+)  
 
-Create virtual environment
+Create virtual environment and install dependencies
 ```
 python3 -m venv .venv
+.\.venv\Scripts\activate
+pip install -r .\requirements.txt
 ```  
-Install dependancies
-```
-pip install -r requirements.txt
-```
 Create a directory called `input/` or specify an input directory as the first parameter that contains all the files you want to crop.
 ```
 python .\mpc-auto-crop.py input 
