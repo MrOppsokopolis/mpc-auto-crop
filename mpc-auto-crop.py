@@ -1,4 +1,8 @@
-import argparse, os, errno, sys
+import argparse
+import os
+import errno
+import sys
+import re
 from pathlib import Path
 from PIL import Image, ImageDraw
 from PIL.Image import Resampling
@@ -9,7 +13,7 @@ import time
 # Handle command line arguments
 # ---------------------------------------------------------
 
-description = 'Draws a black box over the legal print at the bottom of a set of Magic card images.'
+description = 'Crops the 1/8 inch bleed edge (including the rounded corners) around a MTG proxy and converts to PNG'
 
 parser = argparse.ArgumentParser(description=description)
 
@@ -17,11 +21,15 @@ parser = argparse.ArgumentParser(description=description)
 parser.add_argument('inputPath', type=str, help='The path to the input directory containing Magic card images.')
 parser.add_argument('-o', '--output', type=str, default=None, help='The output directory. Defaults to <inputPath>/removed_legal')
 parser.add_argument('-r', '--recursive', action='store_true', help='Include all image files in subdirectories of <inputPath>')
+parser.add_argument('-s', '--scale', type=float, default=0.5, help='Scale of final image. Ppercentage as a decimal. 1=same scale as original. Default=0.5')
+parser.add_argument('-c', '--clean_names', action='store_true', help='Remove everything in "()" from the image name')
 
 args = parser.parse_args()
 input_dir = getattr(args, 'inputPath').replace('\'', '').replace('"', '')
 output_dir = getattr(args, 'output') if getattr(args, 'output') is not None else Path(Path(input_dir).parent, 'output').resolve()
 recursive = getattr(args, 'recursive') if os.name != 'nt' else False
+scale = getattr(args, 'scale')
+clean_names = getattr(args, 'clean_names')
 
 # ---------------------------------------------------------
 # Get files and paths
@@ -60,8 +68,15 @@ for file in files:
     # Add Alpha channel
     with Image.open(file).convert("RGBA") as im:
 
+        # file.stem is just the name, file.name is the name plus extension
+        file_name = file.stem
+
+        # Potentially remove text between () or [] from the name of the file
+        if clean_names:
+            file_name = re.sub(r'[\(\[].*[\)\]]', '', file.stem).strip()
+
         # Save as PNG
-        out_file = Path(output_dir, Path(file).stem + '.png')
+        out_file = Path(output_dir, file_name + '.png')
 
         # print(f'Editing "{out_file.name}"', end='\r')
         print(f'Editing "{out_file.name}"')
@@ -102,7 +117,7 @@ for file in files:
         newIm = Image.fromarray(newImArray, "RGBA")
 
         # Resize the image trying to get under 8MB (the limit for a Discord upload)
-        newIm.thumbnail([sys.maxsize, height * 0.5], Resampling.LANCZOS)
+        newIm.thumbnail([sys.maxsize, height * scale], Resampling.LANCZOS)
 
         newIm.save(out_file)
 
