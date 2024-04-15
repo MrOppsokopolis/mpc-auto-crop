@@ -14,7 +14,7 @@ Create a directory called `input/` or specify an input directory as the first pa
 ```
 python .\mpc-auto-crop.py input 
 ```
-or optionally specify an output directory:
+Optionally specify an output directory:
 ```
 python .\mpc-auto-crop.py input -o path/to/output/directory
 ```
